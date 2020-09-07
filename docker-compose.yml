@@ -1,0 +1,39 @@
+version: '3'
+# "Composefile"のバージョン
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - mysql_data:/var/lib/mysql
+    container_name: rails_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: password
+      TZ: 'Asia/Tokyo'
+  web:
+    build: .
+    container_name: rails_web
+    volumes:
+      - .:/usr/src/
+    ports:
+      - "3000"
+    environment:
+      PORT: 3000
+      BINDING: 0.0.0.0
+    stdin_open: true
+    tty: true
+    # environment,PORT,BINDINGを指定した場合　=> rails s
+    # environment,PORT,BINDINGを指定しない場合　=> bundle exec rails s -p 3000 -b '0.0.0.0'
+  nginx:
+    container_name: rails_nginx
+    build: ./nginx_rails
+    ports:
+    - "80:80"
+    depends_on:
+      - "web"
+    tty: true
+
+volumes:
+  mysql_data:
